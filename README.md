@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <b>🔗 <a href="https://USERNAME.github.io/REPO-NAME/">Click here to open the Base64 converter</a></b>
+  <b>🔗 <a href="https://amirh-ti.github.io/Base64Kit/">Click here to open the Base64 converter</a></b>
 </p>
 
 ---
