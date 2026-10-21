@@ -1,143 +1,406 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en" dir="ltr" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Base64 Encoder / Decoder</title>
+  <!-- فونت وزیرمتن برای نمایش زیبای فارسی -->
+  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
   <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, sans-serif;
-      max-width: 720px;
-      margin: 30px auto;
-      padding: 20px;
-      background: #f6f8fa;
-      color: #24292f;
-      transition: direction 0.2s;
+    :root {
+      /* پالت رنگی دارک گیت‌هاب (پیش‌فرض برای جلوگیری از اذیت شدن چشم) */
+      --bg-main: #0d1117;
+      --bg-card: #161b22;
+      --bg-input: #090d11;
+      --bg-hover: #21262d;
+      --border: #30363d;
+      --border-focus: #58a6ff;
+      --text-main: #e6edf3;
+      --text-muted: #8b949e;
+      --accent-blue: #2f81f7;
+      --accent-blue-hover: #388bfd;
+      --accent-green: #238636;
+      --accent-green-hover: #2ea043;
+      --btn-gray: #21262d;
+      --btn-gray-hover: #30363d;
+      --danger: #f85149;
+      --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
     }
+
+    [data-theme="light"] {
+      /* پالت رنگی لایت گیت‌هاب */
+      --bg-main: #f6f8fa;
+      --bg-card: #ffffff;
+      --bg-input: #f6f8fa;
+      --bg-hover: #eaeef2;
+      --border: #d0d7de;
+      --border-focus: #0969da;
+      --text-main: #1f2328;
+      --text-muted: #656d76;
+      --accent-blue: #0969da;
+      --accent-blue-hover: #0550ae;
+      --accent-green: #1f883d;
+      --accent-green-hover: #1a7f37;
+      --btn-gray: #eaeef2;
+      --btn-gray-hover: #d0d7de;
+      --danger: #cf222e;
+      --shadow: 0 4px 16px rgba(31, 35, 40, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Vazirmatn", sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      max-width: 780px;
+      margin: 36px auto;
+      padding: 0 20px;
+      line-height: 1.6;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    /* هدر و دکمه‌های بالا */
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 28px;
       flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent-blue), #8957e5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: -0.5px;
+      box-shadow: 0 4px 12px rgba(47, 129, 247, 0.3);
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
       gap: 10px;
     }
-    h1 { font-size: 22px; margin: 0; }
+
+    .theme-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+
+    .theme-btn:hover {
+      background: var(--bg-hover);
+      border-color: var(--text-muted);
+    }
+
+    .lang-switch {
+      display: flex;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 3px;
+    }
+
     .lang-switch button {
-      padding: 6px 12px;
-      border: 1px solid #d0d7de;
-      background: #fff;
+      padding: 4px 12px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
       border-radius: 6px;
       cursor: pointer;
       font-size: 13px;
-      margin-inline-start: 4px;
+      font-weight: 600;
+      font-family: inherit;
+      transition: all 0.2s;
     }
+
     .lang-switch button.active {
-      background: #0969da;
-      color: #fff;
-      border-color: #0969da;
+      background: var(--accent-blue);
+      color: #ffffff;
     }
+
+    /* تب‌ها */
     .tabs {
-      display: flex;
-      gap: 4px;
-      margin-bottom: 16px;
-      border-bottom: 1px solid #d0d7de;
+      display: inline-flex;
+      gap: 6px;
+      margin-bottom: 18px;
+      background: var(--bg-card);
+      padding: 5px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
     }
+
     .tab {
-      padding: 10px 16px;
+      padding: 8px 20px;
       border: none;
       background: transparent;
       cursor: pointer;
       font-size: 14px;
-      border-bottom: 2px solid transparent;
-      color: #57606a;
+      font-weight: 500;
+      border-radius: 7px;
+      color: var(--text-muted);
+      font-family: inherit;
+      transition: all 0.2s;
     }
+
+    .tab:hover {
+      color: var(--text-main);
+    }
+
     .tab.active {
-      color: #0969da;
-      border-bottom-color: #0969da;
+      background: var(--bg-hover);
+      color: var(--text-main);
       font-weight: 600;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
+
+    /* کارت اصلی */
     .card {
-      background: #fff;
-      border: 1px solid #d0d7de;
-      border-radius: 8px;
-      padding: 16px;
-      margin-bottom: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: var(--shadow);
     }
+
+    .section-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
     textarea {
       width: 100%;
-      height: 130px;
-      padding: 10px;
-      border: 1px solid #d0d7de;
-      border-radius: 6px;
+      height: 140px;
+      padding: 14px;
+      background: var(--bg-input);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      border-radius: 8px;
       font-size: 14px;
       resize: vertical;
       font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .output {
-      margin-top: 12px;
-      padding: 10px;
-      background: #f6f8fa;
-      border: 1px solid #d0d7de;
-      border-radius: 6px;
-      min-height: 60px;
-      max-height: 300px;
-      overflow: auto;
-      word-break: break-all;
-      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(47, 129, 247, 0.15);
+    }
+
+    .mono-box {
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
       direction: ltr;
       text-align: left;
       font-size: 13px;
-      white-space: pre-wrap;
     }
+
+    /* دکمه‌ها */
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 16px 0 20px 0;
+    }
+
     .actions {
       display: flex;
-      gap: 8px;
-      margin-top: 10px;
+      gap: 10px;
       flex-wrap: wrap;
     }
+
     button.btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
       padding: 9px 16px;
-      background: #2da44e;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
+      background: var(--accent-green);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
       cursor: pointer;
       font-size: 14px;
+      font-weight: 500;
+      font-family: inherit;
+      transition: all 0.15s ease;
     }
-    button.btn:hover { background: #218838; }
-    button.btn.blue { background: #0969da; }
-    button.btn.blue:hover { background: #0550ae; }
-    button.btn.gray { background: #6e7781; }
-    button.btn.gray:hover { background: #57606a; }
-    button.btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .options { margin-top: 10px; font-size: 13px; }
-    .options label { cursor: pointer; user-select: none; }
-    .file-info {
-      margin-top: 8px;
+
+    button.btn:hover {
+      background: var(--accent-green-hover);
+      transform: translateY(-1px);
+    }
+
+    button.btn:active {
+      transform: translateY(0);
+    }
+
+    button.btn.blue {
+      background: var(--accent-blue);
+    }
+    button.btn.blue:hover {
+      background: var(--accent-blue-hover);
+    }
+
+    button.btn.gray {
+      background: var(--btn-gray);
+      color: var(--text-main);
+      border-color: var(--border);
+    }
+    button.btn.gray:hover {
+      background: var(--btn-gray-hover);
+    }
+
+    /* چک‌باکس URL-Safe */
+    .options label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
       font-size: 13px;
-      color: #57606a;
+      color: var(--text-muted);
+      transition: color 0.2s;
     }
-    .hidden { display: none !important; }
-    input[type="file"] {
-      width: 100%;
-      padding: 8px;
-      border: 1px dashed #d0d7de;
-      border-radius: 6px;
-      background: #fafbfc;
+    .options label:hover {
+      color: var(--text-main);
+    }
+    .options input[type="checkbox"] {
+      accent-color: var(--accent-blue);
+      width: 16px;
+      height: 16px;
       cursor: pointer;
     }
-    .error { color: #cf222e; }
+
+    /* بخش آپلود فایل */
+    .file-drop-area {
+      position: relative;
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      padding: 28px 20px;
+      text-align: center;
+      background: var(--bg-input);
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .file-drop-area:hover, .file-drop-area.dragover {
+      border-color: var(--accent-blue);
+      background: rgba(47, 129, 247, 0.05);
+    }
+
+    .file-drop-area input[type="file"] {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .file-drop-icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .file-drop-text {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .file-info {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--accent-blue);
+      font-weight: 500;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .error-text {
+      color: var(--danger) !important;
+      border-color: var(--danger) !important;
+    }
+
+    /* نوتیفیکیشن (Toast) */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--text-main);
+      color: var(--bg-main);
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      z-index: 1000;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
   </style>
 </head>
 <body>
 
   <div class="header">
-    <h1 id="page-title">Base64 Encoder / Decoder</h1>
-    <div class="lang-switch">
-      <button id="btn-en" class="active" onclick="setLang('en')">EN</button>
-      <button id="btn-fa" onclick="setLang('fa')">FA</button>
+    <div class="brand">
+      <div class="brand-icon">B64</div>
+      <h1 id="page-title">Base64 Encoder / Decoder</h1>
+    </div>
+    <div class="header-controls">
+      <button class="theme-btn" id="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">☀️</button>
+      <div class="lang-switch">
+        <button id="btn-en" class="active" onclick="setLang('en')">EN</button>
+        <button id="btn-fa" onclick="setLang('fa')">FA</button>
+      </div>
     </div>
   </div>
 
@@ -148,44 +411,63 @@
 
   <!-- ================= TEXT TAB ================= -->
   <div id="tab-text" class="card">
-    <textarea id="text-input" placeholder="Enter text here..."></textarea>
-    <div class="actions">
-      <button class="btn" onclick="encodeText()" id="btn-encode-text">Encode to Base64</button>
-      <button class="btn blue" onclick="decodeText()" id="btn-decode-text">Decode from Base64</button>
-      <button class="btn gray" onclick="clearText()" id="btn-clear-text">Clear</button>
+    <div class="section-label">
+      <span id="lbl-input-text">Input</span>
     </div>
-    <div class="output" id="text-output"></div>
-    <div class="actions">
-      <button class="btn blue" onclick="copyOut('text-output')" id="btn-copy-text">Copy Result</button>
+    <textarea id="text-input" placeholder="Enter text or Base64 here..."></textarea>
+
+    <div class="toolbar">
+      <div class="actions">
+        <button class="btn" onclick="encodeText()" id="btn-encode-text">Encode to Base64</button>
+        <button class="btn blue" onclick="decodeText()" id="btn-decode-text">Decode from Base64</button>
+        <button class="btn gray" onclick="clearText()" id="btn-clear-text">Clear</button>
+      </div>
+      <div class="options">
+        <label>
+          <input type="checkbox" id="urlsafe-text" onchange="onUrlSafeChange()">
+          <span id="lbl-urlsafe-text">URL-safe Base64 (-_ instead of +/)</span>
+        </label>
+      </div>
     </div>
-    <div class="options">
-      <label>
-        <input type="checkbox" id="urlsafe-text" onchange="onUrlSafeChange()">
-        <span id="lbl-urlsafe-text">URL-safe Base64 (replace +/ with -_ and remove =)</span>
-      </label>
+
+    <div class="section-label">
+      <span id="lbl-output-text">Result</span>
+      <button class="btn gray" style="padding: 4px 10px; font-size: 12px;" onclick="copyOut('text-output', 'btn-copy-text')" id="btn-copy-text">Copy Result</button>
     </div>
+    <textarea id="text-output" class="mono-box" readonly placeholder="Result will appear here..."></textarea>
   </div>
 
   <!-- ================= FILE TAB ================= -->
   <div id="tab-file" class="card hidden">
-    <input type="file" id="file-input" onchange="onFileSelected()">
-    <div class="file-info" id="file-info"></div>
-    <div class="actions">
-      <button class="btn" onclick="encodeFile()" id="btn-encode-file">Encode File</button>
-      <button class="btn blue" onclick="decodeFile()" id="btn-decode-file">Decode & Download</button>
-      <button class="btn gray" onclick="clearFile()" id="btn-clear-file">Clear</button>
+    <div class="file-drop-area" id="drop-area">
+      <span class="file-drop-icon">📁</span>
+      <div class="file-drop-text" id="lbl-drop-file">Click to select a file, or drag & drop here</div>
+      <input type="file" id="file-input" onchange="onFileSelected()">
+      <div class="file-info" id="file-info"></div>
     </div>
-    <div class="output" id="file-output"></div>
-    <div class="actions">
-      <button class="btn blue" onclick="copyOut('file-output')" id="btn-copy-file">Copy Result</button>
+
+    <div class="toolbar">
+      <div class="actions">
+        <button class="btn" onclick="encodeFile()" id="btn-encode-file">Encode File to Base64</button>
+        <button class="btn blue" onclick="decodeFile()" id="btn-decode-file">Decode Base64 & Download</button>
+        <button class="btn gray" onclick="clearFile()" id="btn-clear-file">Clear</button>
+      </div>
+      <div class="options">
+        <label>
+          <input type="checkbox" id="urlsafe-file">
+          <span id="lbl-urlsafe-file">URL-safe Base64 (-_ instead of +/)</span>
+        </label>
+      </div>
     </div>
-    <div class="options">
-      <label>
-        <input type="checkbox" id="urlsafe-file">
-        <span id="lbl-urlsafe-file">URL-safe Base64 (replace +/ with -_ and remove =)</span>
-      </label>
+
+    <div class="section-label">
+      <span id="lbl-output-file">Base64 Content (Output / Paste to Decode)</span>
+      <button class="btn gray" style="padding: 4px 10px; font-size: 12px;" onclick="copyOut('file-output', 'btn-copy-file')" id="btn-copy-file">Copy Result</button>
     </div>
+    <textarea id="file-output" class="mono-box" placeholder="Encoded file Base64 will appear here, OR paste Base64 here to Decode & Download..."></textarea>
   </div>
+
+  <div id="toast" class="toast"></div>
 
 <script>
 /* =========================================================
@@ -196,53 +478,92 @@ const I18N = {
     title: 'Base64 Encoder / Decoder',
     tabText: 'Text',
     tabFile: 'File',
-    inputPlaceholder: 'Enter text here...',
+    lblInputText: 'Input',
+    lblOutputText: 'Result',
+    lblOutputFile: 'Base64 Content (Output / Paste to Decode)',
+    dropFile: 'Click to select a file, or drag & drop here',
+    inputPlaceholder: 'Enter text or Base64 string here...',
     outputPlaceholder: 'Result will appear here...',
+    fileOutPlaceholder: 'Encoded file Base64 will appear here, OR paste Base64 here to Decode & Download...',
     encodeText: 'Encode to Base64',
     decodeText: 'Decode from Base64',
     clear: 'Clear',
     copy: 'Copy Result',
-    copied: 'Copied!',
+    copied: 'Copied to clipboard!',
     urlsafe: 'URL-safe Base64 (replace +/ with -_ and remove =)',
     encodeFile: 'Encode File',
     decodeFile: 'Decode & Download',
-    noFile: 'No file selected.',
+    noFile: 'Please select a file first.',
     fileSize: 'Size',
     fileType: 'Type',
     errorEncode: 'Encoding error: ',
     errorDecode: 'Decoding error: ',
     invalidBase64: 'Invalid Base64 string.',
     downloaded: 'File downloaded: ',
-    decodedEmpty: 'Nothing to decode. Please paste Base64 content into the input box (File tab).',
-    decodeFileHint: 'To decode a file: paste its Base64 string into the file tab input and click Decode & Download.',
+    decodedEmpty: 'Nothing to decode! Paste Base64 into the box below first.',
   },
   fa: {
-    title: 'کدگذار / کدگشای Base64',
+    title: 'کدگذار و کدگشای Base64',
     tabText: 'متن',
     tabFile: 'فایل',
-    inputPlaceholder: 'متن خود را اینجا وارد کنید...',
+    lblInputText: 'ورودی',
+    lblOutputText: 'خروجی',
+    lblOutputFile: 'محتوای Base64 (خروجی فایل / یا محل Paste برای دانلود)',
+    dropFile: 'برای انتخاب فایل کلیک کنید یا فایل را به اینجا بکشید',
+    inputPlaceholder: 'متن یا رشته Base64 خود را اینجا وارد کنید...',
     outputPlaceholder: 'نتیجه اینجا نمایش داده می‌شود...',
-    encodeText: 'تبدیل متن به Base64',
-    decodeText: 'تبدیل Base64 به متن',
+    fileOutPlaceholder: 'خروجی Base64 فایل اینجا قرار می‌گیرد؛ یا اینکه کد Base64 را اینجا Paste کرده و دکمه «تبدیل و دانلود فایل» را بزنید...',
+    encodeText: 'تبدیل به Base64',
+    decodeText: 'رمزگشایی از Base64',
     clear: 'پاک کردن',
     copy: 'کپی نتیجه',
-    copied: 'کپی شد!',
+    copied: 'در حافظه کپی شد!',
     urlsafe: 'حالت URL-safe (تبدیل +/ به -_ و حذف =)',
     encodeFile: 'تبدیل فایل به Base64',
     decodeFile: 'تبدیل و دانلود فایل',
-    noFile: 'فایلی انتخاب نشده است.',
+    noFile: 'لطفاً ابتدا یک فایل انتخاب کنید.',
     fileSize: 'حجم',
     fileType: 'نوع',
     errorEncode: 'خطا در کدگذاری: ',
     errorDecode: 'خطا در کدگشایی: ',
     invalidBase64: 'رشته Base64 نامعتبر است.',
     downloaded: 'فایل دانلود شد: ',
-    decodedEmpty: 'چیزی برای تبدیل نیست. لطفاً رشته Base64 را در کادر ورودی قرار دهید (تب فایل).',
-    decodeFileHint: 'برای تبدیل فایل: رشته Base64 آن را در کادر تب فایل قرار دهید و روی «تبدیل و دانلود فایل» کلیک کنید.',
+    decodedEmpty: 'چیزی برای تبدیل نیست! لطفاً رشته Base64 را در کادر پایین قرار دهید.',
   }
 };
 
 let currentLang = 'en';
+
+/* =========================================================
+   Theme Switching (Default Dark)
+   ========================================================= */
+function toggleTheme() {
+  const html = document.documentElement;
+  const current = html.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  document.getElementById('theme-toggle').textContent = next === 'dark' ? '☀️' : '🌙';
+  localStorage.setItem('b64_theme', next);
+}
+
+// Load saved theme if user explicitly changed it before, otherwise keep dark
+const savedTheme = localStorage.getItem('b64_theme');
+if (savedTheme === 'light') {
+  document.documentElement.setAttribute('data-theme', 'light');
+  document.getElementById('theme-toggle').textContent = '🌙';
+}
+
+/* =========================================================
+   Toast Notification
+   ========================================================= */
+let toastTimeout;
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => toast.classList.remove('show'), 2600);
+}
 
 /* =========================================================
    Language switching
@@ -262,7 +583,15 @@ function setLang(lang) {
   document.getElementById('tab-text-btn').textContent = t.tabText;
   document.getElementById('tab-file-btn').textContent = t.tabFile;
 
+  document.getElementById('lbl-input-text').textContent = t.lblInputText;
+  document.getElementById('lbl-output-text').textContent = t.lblOutputText;
+  document.getElementById('lbl-output-file').textContent = t.lblOutputFile;
+  document.getElementById('lbl-drop-file').textContent = t.dropFile;
+
   document.getElementById('text-input').placeholder = t.inputPlaceholder;
+  document.getElementById('text-output').placeholder = t.outputPlaceholder;
+  document.getElementById('file-output').placeholder = t.fileOutPlaceholder;
+
   document.getElementById('btn-encode-text').textContent = t.encodeText;
   document.getElementById('btn-decode-text').textContent = t.decodeText;
   document.getElementById('btn-clear-text').textContent = t.clear;
@@ -275,7 +604,6 @@ function setLang(lang) {
   document.getElementById('btn-copy-file').textContent = t.copy;
   document.getElementById('lbl-urlsafe-file').textContent = t.urlsafe;
 
-  // update file info if a file is selected
   if (document.getElementById('file-input').files[0]) onFileSelected();
 }
 
@@ -303,9 +631,7 @@ function b64EncodeUnicode(str) {
 }
 
 function b64DecodeUnicode(str) {
-  // normalize URL-safe
   str = str.replace(/-/g, '+').replace(/_/g, '/').replace(/\s+/g, '');
-  // add padding if missing
   const pad = str.length % 4;
   if (pad) str += '='.repeat(4 - pad);
 
@@ -343,46 +669,46 @@ function base64ToArrayBuffer(b64) {
    Copy
    ========================================================= */
 function copyOut(id) {
-  const text = document.getElementById(id).textContent;
+  const el = document.getElementById(id);
+  const text = el.value.trim();
   if (!text) return;
   navigator.clipboard.writeText(text).then(() => {
-    alert(I18N[currentLang].copied);
+    showToast(I18N[currentLang].copied);
   }).catch(() => {
-    // fallback
-    const ta = document.createElement('textarea');
-    ta.value = text;
-    document.body.appendChild(ta);
-    ta.select();
+    el.select();
     document.execCommand('copy');
-    ta.remove();
-    alert(I18N[currentLang].copied);
+    showToast(I18N[currentLang].copied);
   });
 }
 
 /* =========================================================
    Text tab logic
    ========================================================= */
+let lastTextOp = null;
+
 function onUrlSafeChange() {
-  // re-run last operation if there's something
-  const out = document.getElementById('text-output');
-  if (out.textContent) {
-    // try decode to re-encode or vice versa? Simpler: just leave as-is.
-    // User can click encode/decode again.
-  }
+  if (lastTextOp === 'encode') encodeText();
 }
 
 function encodeText() {
   const t = I18N[currentLang];
   const input = document.getElementById('text-input').value;
   const out = document.getElementById('text-output');
+  if (!input) {
+    out.value = '';
+    return;
+  }
   try {
     let b64 = b64EncodeUnicode(input);
     if (document.getElementById('urlsafe-text').checked) b64 = toUrlSafe(b64);
-    out.classList.remove('error');
-    out.textContent = b64 || t.outputPlaceholder;
+    out.classList.remove('error-text');
+    out.style.direction = 'ltr';
+    out.style.textAlign = 'left';
+    out.value = b64;
+    lastTextOp = 'encode';
   } catch (e) {
-    out.classList.add('error');
-    out.textContent = t.errorEncode + e.message;
+    out.classList.add('error-text');
+    out.value = t.errorEncode + e.message;
   }
 }
 
@@ -391,25 +717,28 @@ function decodeText() {
   const input = document.getElementById('text-input').value.trim();
   const out = document.getElementById('text-output');
   if (!input) {
-    out.classList.remove('error');
-    out.textContent = t.outputPlaceholder;
+    out.value = '';
     return;
   }
   try {
     const decoded = b64DecodeUnicode(input);
-    out.classList.remove('error');
-    out.textContent = decoded;
-    // if user language is Persian, and decoded text has Persian, direction will handle itself
+    out.classList.remove('error-text');
+    out.style.direction = 'auto';
+    out.style.textAlign = 'start';
+    out.value = decoded;
+    lastTextOp = 'decode';
   } catch (e) {
-    out.classList.add('error');
-    out.textContent = t.errorDecode + e.message;
+    out.classList.add('error-text');
+    out.value = t.errorDecode + e.message;
   }
 }
 
 function clearText() {
   document.getElementById('text-input').value = '';
-  document.getElementById('text-output').textContent = '';
-  document.getElementById('text-output').classList.remove('error');
+  const out = document.getElementById('text-output');
+  out.value = '';
+  out.classList.remove('error-text');
+  lastTextOp = null;
 }
 
 /* =========================================================
@@ -426,10 +755,10 @@ function onFileSelected() {
   const file = document.getElementById('file-input').files[0];
   const info = document.getElementById('file-info');
   if (!file) {
-    info.textContent = t.noFile;
+    info.textContent = '';
     return;
   }
-  info.textContent = `${file.name} — ${t.fileSize}: ${formatSize(file.size)} — ${t.fileType}: ${file.type || 'unknown'}`;
+  info.textContent = `${file.name} (${formatSize(file.size)} - ${file.type || 'unknown'})`;
 }
 
 async function encodeFile() {
@@ -437,29 +766,29 @@ async function encodeFile() {
   const file = document.getElementById('file-input').files[0];
   const out = document.getElementById('file-output');
   if (!file) {
-    alert(t.noFile);
+    showToast(t.noFile);
     return;
   }
   try {
-    out.classList.remove('error');
-    out.textContent = '...';
+    out.classList.remove('error-text');
+    out.value = '...';
     const buffer = await file.arrayBuffer();
     let b64 = arrayBufferToBase64(buffer);
     if (document.getElementById('urlsafe-file').checked) b64 = toUrlSafe(b64);
-    out.textContent = b64;
+    out.value = b64;
   } catch (e) {
-    out.classList.add('error');
-    out.textContent = t.errorEncode + e.message;
+    out.classList.add('error-text');
+    out.value = t.errorEncode + e.message;
   }
 }
 
 function decodeFile() {
   const t = I18N[currentLang];
   const out = document.getElementById('file-output');
-  const b64 = out.textContent.trim();
+  const b64 = out.value.trim();
 
   if (!b64) {
-    alert(t.decodedEmpty);
+    showToast(t.decodedEmpty);
     return;
   }
 
@@ -467,14 +796,12 @@ function decodeFile() {
     const buffer = base64ToArrayBuffer(b64);
     const bytes = new Uint8Array(buffer);
 
-    // Try to detect file type from magic bytes
     const { mime, ext } = detectFileType(bytes);
 
-    // Determine filename
     const selectedFile = document.getElementById('file-input').files[0];
     let filename = selectedFile
       ? selectedFile.name.replace(/\.[^.]+$/, '') + '_decoded.' + ext
-      : 'decoded.' + ext;
+      : 'decoded_file.' + ext;
 
     const blob = new Blob([bytes], { type: mime });
     const url = URL.createObjectURL(blob);
@@ -486,18 +813,19 @@ function decodeFile() {
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
 
-    out.classList.remove('error');
-    alert(t.downloaded + filename);
+    out.classList.remove('error-text');
+    showToast(t.downloaded + filename);
   } catch (e) {
-    out.classList.add('error');
-    alert(t.invalidBase64 + '\n' + e.message);
+    out.classList.add('error-text');
+    showToast(t.invalidBase64);
   }
 }
 
 function clearFile() {
   document.getElementById('file-input').value = '';
-  document.getElementById('file-output').textContent = '';
-  document.getElementById('file-output').classList.remove('error');
+  const out = document.getElementById('file-output');
+  out.value = '';
+  out.classList.remove('error-text');
   document.getElementById('file-info').textContent = '';
 }
 
@@ -511,7 +839,7 @@ function detectFileType(bytes) {
     { sig: '89504e47', mime: 'image/png', ext: 'png' },
     { sig: 'ffd8ff',   mime: 'image/jpeg', ext: 'jpg' },
     { sig: '47494638', mime: 'image/gif', ext: 'gif' },
-    { sig: '52494646', mime: 'audio/wav', ext: 'wav' }, // RIFF - could be avi too
+    { sig: '52494646', mime: 'audio/wav', ext: 'wav' },
     { sig: '25504446', mime: 'application/pdf', ext: 'pdf' },
     { sig: '504b0304', mime: 'application/zip', ext: 'zip' },
     { sig: '1f8b',     mime: 'application/gzip', ext: 'gz' },
@@ -534,7 +862,6 @@ function detectFileType(bytes) {
     }
   }
 
-  // Try to guess text
   try {
     new TextDecoder('utf-8', { fatal: true }).decode(bytes.slice(0, 512));
     return { mime: 'text/plain', ext: 'txt' };
