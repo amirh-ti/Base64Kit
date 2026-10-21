@@ -11,6 +11,10 @@
   <b>🔗 <a href="https://amirh-ti.github.io/Base64Kit/">Click here to open the Base64 converter</a></b>
 </p>
 
+<p align="center">
+  🌐 <b>Languages:</b> English | <a href="./README_FA.md">فارسی</a>
+</p>
+
 ---
 
 ### ✨ Features
